@@ -1,0 +1,10 @@
+*__pycache__*
+*.pyc
+*.egg-info*
+docs/_*
+cartoreader_lite/output/*
+.pytest_cache*
+.vscode*
+coverage_html*
+dist*
+.coverage
