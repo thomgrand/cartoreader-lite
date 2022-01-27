@@ -12,7 +12,7 @@ setup(name="cartoreader-lite",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/thomgrand/cartoreader-lite",
-    packages=["cartoreader_lite", "cartoreader_lite.high_level", "cartoreader_lite.low_level"],
+    packages=["cartoreader_lite", "cartoreader_lite.high_level", "cartoreader_lite.low_level", "cartoreader_lite.postprocessing"],
     install_requires=["numpy", "pyvista>=0.33", "vtk", "pandas", "scipy", 
                          "trimesh", "rtree"], #Geometric postprocessing
     classifiers=[

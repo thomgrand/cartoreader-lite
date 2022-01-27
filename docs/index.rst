@@ -40,26 +40,6 @@ Usage
 
 .. include:: example.inc
 
-Citation
-------------
-
-If you use the library in your scientific projects, please cite the associated `Zenodo archive <https://www.zenodo.org>`_.
-
-.. code-block:: bibtex
-
-   %TODO
-   @software{thomas_grandits_2021_5594452,
-      author       = {Thomas Grandits},
-      title        = {A Fast Iterative Method Python package},
-      month        = oct,
-      year         = 2021,
-      publisher    = {Zenodo},
-      version      = {1.1},
-      doi          = {10.5281/zenodo.5594452},
-      url          = {https://doi.org/10.5281/zenodo.5594452}
-   }
-
-
 Detailed Content
 -----------------
 .. toctree::
