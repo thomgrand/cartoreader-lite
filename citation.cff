@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Grandits"
+  given-names: "Thomas"
+title: "CARTOreader - lite"
+version: 1.0.1
+doi: 10.5281/zenodo.5918396
+date-released: 2022-01-29
+url: "https://github.com/thomgrand/cartoreader-lite"

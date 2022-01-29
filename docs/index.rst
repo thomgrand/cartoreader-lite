@@ -40,6 +40,25 @@ Usage
 
 .. include:: example.inc
 
+Citation
+------------
+
+If you use the library in your scientific projects, please cite the associated Zenodo archive: https://zenodo.org/record/5918396.
+
+.. code-block:: bibtex
+
+   @software{grandits_2022_5918396,
+      author       = {Thomas Grandits},
+      title        = {CARTOreader - lite},
+      month        = jan,
+      year         = 2022,
+      publisher    = {Zenodo},
+      version      = {v1.0.1},
+      doi          = {10.5281/zenodo.5918396},
+      url          = {https://doi.org/10.5281/zenodo.5918396}
+   }
+
+
 Detailed Content
 -----------------
 .. toctree::
