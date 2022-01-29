@@ -7,7 +7,7 @@ with open(os.path.join(os.path.dirname(__file__), 'README.md'), 'r') as readme:
      long_description = readme.read()
 
 setup(name="cartoreader-lite",
-    version="1.0.0",    
+    version="1.0.1",    
     description="Cartoreader-lite provides a simplified and easy low-level access to CARTO3 studies.",
     long_description=long_description,
     long_description_content_type="text/markdown",

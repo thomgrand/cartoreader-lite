@@ -1,7 +1,7 @@
 # CARTOreader - lite
 
 [![CI Tests](https://github.com/thomgrand/cartoreader-lite/actions/workflows/python-package.yml/badge.svg)](https://github.com/thomgrand/cartoreader-lite/actions/workflows/python-package.yml)
-[![codecov](https://codecov.io/gh/thomgrand/cartoreader-lite/branch/main/graph/badge.svg?token=4A7DD8DWXW)](https://codecov.io/gh/thomgrand/cartoreader-lite)
+[![codecov](https://codecov.io/gh/thomgrand/cartoreader-lite/branch/public/graph/badge.svg?token=4A7DD8DWXW)](https://codecov.io/gh/thomgrand/cartoreader-lite)
 
 This repository is an inofficial reader to easily process exported [CARTO3 data](https://www.jnjmedicaldevices.com/en-US/product/carto-3-system) in Python.
 It does not provide the more extensive capabilities to analyze the signals, such as [OpenEP](https://openep.io/), but is rather meant as a simple reader to import CARTO data. 
@@ -28,6 +28,9 @@ python tests/generate_test_data.py
 
 ```python
 from cartoreader_lite import CartoStudy
+import pyvista as pv
+import numpy as np
+
 study_dir = "openep-testingdata/Carto/Export_Study-1-11_25_2021-15-01-32"
 study_name = "Study 1 11_25_2021 15-01-32.xml"
 study = CartoStudy(study_dir, study_name, 

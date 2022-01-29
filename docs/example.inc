@@ -9,6 +9,9 @@ None is provided with this repository, but you can download the testing data pro
 .. code-block:: python
     
     from cartoreader_lite import CartoStudy
+    import pyvista as pv
+    import numpy as np
+    
     study_dir = "openep-testingdata/Carto/Export_Study-1-11_25_2021-15-01-32"
     study_name = "Study 1 11_25_2021 15-01-32.xml"
     study = CartoStudy(study_dir, study_name, 
