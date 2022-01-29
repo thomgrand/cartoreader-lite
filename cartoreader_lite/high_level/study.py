@@ -1,4 +1,5 @@
 from __future__ import annotations #recursive type hinting
+from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor 
 import logging as log
 import pickle
 from typing import Dict, List, Tuple, IO, Union
@@ -25,6 +26,7 @@ dtype_simplify_dict = {"InAccurateSeverity": np.int8,
 #np.iinfo(np.int8)
 #np.issubdtype(np.int8, np.integer)
 
+
 class AblationSites():
     """High level class for easily referencing ablation sites read from the visitag files.
     Automatically generated from :class:`.CartoStudy`.
@@ -39,6 +41,11 @@ class AblationSites():
     position_to_vec : bool, optional
         If true, the entries X, Y, Z of the dataframes will be unified in the resulting tables to a single 3D vector pos.
         By default, True
+    parse_file_tag : bool, optional
+        If true, not just Sites, RawPositions, ... will be parse, but also files with suffixes (e.g. Sites_QMODE+).
+        All data will be concatenated into a single pd.Dataframe with an additional column `file_tag` that marks the file suffix.
+        Note that the concatenation will set values, absent from one of the files, to NaN.
+        By default, True
     """
 
     session_avg_data : pd.DataFrame #: Contains average data of each ablation session, such as :term:`RFIndex`, average force and position
@@ -47,30 +54,48 @@ class AblationSites():
     session_force_data : List[Tuple[int, pd.DataFrame]] = None #: Force data provided by the low level classes. Only present if `resample_unified_time` was False
 
     def __init__(self, visitag_data : Dict[str, pd.DataFrame], resample_unified_time=True,
-                 position_to_vec=True) -> None:
-                 
+                 position_to_vec=True, parse_file_tag=True) -> None:
+
+        #If parse_file_tag is True, this function will match a regular expression with the keys and append the matched group to the data
+        def visitag_data_w_suffix(name : str) -> pd.DataFrame: 
+            if not parse_file_tag:
+                return visitag_data[name]
+
+            complete_data = []
+            for k, data in visitag_data.items():
+                if (match := re.match(name + r"_?(.*)", k)):
+                    data["file_tag"] = match.group(1)
+                    complete_data.append(data)
+
+            complete_data = pd.concat(complete_data)
+            #Remove the column if it is redundant (no file tags)
+            if np.all(complete_data["file_tag"] == ""):
+                complete_data = complete_data.drop(labels=["file_tag"], axis=1)
+
+            return complete_data
+
         if resample_unified_time:
             #Contact force data uses a different time label, but the timings look the same as the other data
-            contact_force_data = visitag_data["ContactForceData"].rename(columns={"Time": "TimeStamp"})
-            time_data = unify_time_data([visitag_data["RawPositions"], visitag_data["AblationData"], contact_force_data], time_k="TimeStamp", 
+            contact_force_data = visitag_data_w_suffix("ContactForceData").rename(columns={"Time": "TimeStamp"})
+            time_data = unify_time_data([visitag_data_w_suffix("RawPositions"), visitag_data_w_suffix("AblationData"), contact_force_data], time_k="TimeStamp", 
                                          time_interval=100, kind="quadratic")
             self.session_time_data = list(simplify_dataframe_dtypes(time_data, dtype_simplify_dict).groupby("Session"))
             
         else:
-            self.session_time_data = list(simplify_dataframe_dtypes(visitag_data["RawPositions"], dtype_simplify_dict).groupby("Session"))
-            self.session_rf_data = list(simplify_dataframe_dtypes(visitag_data["AblationData"], dtype_simplify_dict).groupby("Session"))
-            self.session_force_data = list(simplify_dataframe_dtypes(visitag_data["ContactForceData"], dtype_simplify_dict).groupby("Session"))
+            self.session_time_data = list(simplify_dataframe_dtypes(visitag_data_w_suffix("RawPositions"), dtype_simplify_dict).groupby("Session"))
+            self.session_rf_data = list(simplify_dataframe_dtypes(visitag_data_w_suffix("AblationData"), dtype_simplify_dict).groupby("Session"))
+            self.session_force_data = list(simplify_dataframe_dtypes(visitag_data_w_suffix("ContactForceData"), dtype_simplify_dict).groupby("Session"))
 
-        self.session_avg_data = simplify_dataframe_dtypes(visitag_data["Sites"], dtype_simplify_dict)
+        self.session_avg_data = simplify_dataframe_dtypes(visitag_data_w_suffix("Sites"), dtype_simplify_dict)
 
         if position_to_vec:
             self.session_avg_data = xyz_to_pos_vec(self.session_avg_data)
             self.session_time_data = [(session_id, xyz_to_pos_vec(time_data)) for session_id, time_data in self.session_time_data]
 
-ecg_gain_re = re.compile("\s*Raw ECG to MV \(gain\)\s*\=\s*(-?\d+\.?\d*)\s*")
+ecg_gain_re = re.compile(r"\s*Raw ECG to MV \(gain\)\s*\=\s*(-?\d+\.?\d*)\s*")
 ecg_labels = ["I", "II", "III", "aVR", "aVL", "aVF"] + [f"V{i+1}" for i in range(6)]
-ecg_labels_re = [re.compile(l + "\(\d+\)") for l in ecg_labels]
-egm_label_re = re.compile("(.+)\((\d+)\)")
+ecg_labels_re = [re.compile(l + r"\(\d+\)") for l in ecg_labels]
+egm_label_re = re.compile(r"(.+)\((\d+)\)")
 
 class CartoPointDetailData():
     """Detailed data associated to a CARTO3 point.
@@ -191,7 +216,9 @@ class CartoMap():
 
         #Point data
         if len(ll_map.points_main_data) > 0:
-            self._points_raw = np.array([CartoPointDetailData(main_data, raw_data, remove_egm_header_numbers) for (row_i, main_data), raw_data in zip(ll_map.points_main_data.iterrows(), ll_map.point_raw_data)])
+            with ProcessPoolExecutor() as pool:
+                self._points_raw = [pool.submit(CartoPointDetailData, main_data, raw_data, remove_egm_header_numbers) for (row_i, main_data), raw_data in zip(ll_map.points_main_data.iterrows(), ll_map.point_raw_data)]
+                self._points_raw = np.array([p_r.result() for p_r in self._points_raw])
             self.points = pd.DataFrame([p.main_point_pd_row for p in self._points_raw])
 
             if discard_invalid_points:

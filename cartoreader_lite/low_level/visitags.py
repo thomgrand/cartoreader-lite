@@ -6,9 +6,9 @@ from os import PathLike
 import os
 import re
 
-visitag_misc_data_re_i = re.compile("^\s+(\w+)=\s+(-?\d+)")
-visitag_misc_data_re_f = re.compile("^\s+(\w+)=\s+(-?\d+\.\d+)")
-visitag_misc_data_re = re.compile("^\s+(\w+)=\s+(\w+)")
+visitag_misc_data_re_i = re.compile(r"^\s+(\w+)=\s+(-?\d+)")
+visitag_misc_data_re_f = re.compile(r"^\s+(\w+)=\s+(-?\d+\.\d+)")
+visitag_misc_data_re = re.compile(r"^\s+(\w+)=\s+(\w+)")
 
 def parse_misc_visitag_data(file_h : Union[IO, PathLike]):
     with open(file_h, "r") as f:
