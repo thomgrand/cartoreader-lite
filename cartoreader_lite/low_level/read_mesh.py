@@ -12,13 +12,13 @@ import pyvista as pv
 import vtk
 import logging as log
 
-section_re_expr_str = "\[(\S+)\]"
+section_re_expr_str = r"\[(\S+)\]"
 section_re_expr = re.compile(section_re_expr_str)
 
-attribute_re_expr_str = "(\S+)\s+=\s*(.*)"
+attribute_re_expr_str = r"(\S+)\s+=\s*(.*)"
 attribute_re_expr = re.compile(attribute_re_expr_str)
 
-blank_line_expr = re.compile("\s+")
+blank_line_expr = re.compile(r"\s+")
 
 def read_section(lines : Iterable[str]) -> pd.DataFrame:
     """Reads a single section of the .mesh files
@@ -38,7 +38,7 @@ def read_section(lines : Iterable[str]) -> pd.DataFrame:
     df = pd.read_csv(verts_io, comment=";", header=None, sep="\s+")
     valid_line_i = [i for i, l in enumerate(lines) if not l.strip().startswith(";")][0] #Find first non-comment line
     assert valid_line_i > 0, "No header row found"
-    names = [name for name in re.split("\s+", lines[valid_line_i-1]) if name not in ["", ";"]]
+    names = [name for name in re.split(r"\s+", lines[valid_line_i-1]) if name not in ["", ";"]]
     return df, names
 
 def read_vertices(data : pd.DataFrame):

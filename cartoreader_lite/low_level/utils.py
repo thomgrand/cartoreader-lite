@@ -13,7 +13,7 @@ import numpy as np
 from scipy.interpolate import interp1d
 from scipy.spatial import cKDTree
 
-multi_whitespace_re = re.compile("\s\s+")
+multi_whitespace_re = re.compile(r"\s\s+")
 
 def read_connectors(xml_elem : Element, path_prefix : str) -> Dict[str, List[pd.DataFrame]]:
     """Reads connector data from the main XML element, pointing to multiple files with the attached connector data.
@@ -164,7 +164,7 @@ def simplify_dataframe_dtypes(df : pd.DataFrame, dtype_dict : dict, inplace=True
 def interp1d_dtype(x : np.ndarray, y : np.ndarray, *args, **kwargs):
 
     #For complex objects (e.g. strings), just take the closest object
-    if y.dtype == np.object0:
+    if y.dtype == np.object0 or y.dtype == str:
         kdtree = cKDTree(x[:, np.newaxis])
         interp_f = lambda x_query: y[kdtree.query(x_query[:, np.newaxis])[1]]
     else:
@@ -200,7 +200,8 @@ def interpolate_time_data(dfs : Iterable[pd.DataFrame], time_k, time_steps, **in
             if col_name in df_interp:
                 interpolated_val = df_interp[col_name](time_steps)
                 if col_name in new_df_dict: #Already present -> Multiple dataframes contain the data
-                    assert np.allclose(new_df_dict[col_name], interpolated_val, rtol=1e-1), f"Dataframe values of column {col_name} are not matching"
+                    assert not np.issubdtype(new_df_dict[col_name].dtype, np.number) or np.allclose(new_df_dict[col_name], interpolated_val, rtol=1e-1), \
+                            f"Dataframe values of column {col_name} are not matching"
                 else:
                     new_df_dict[col_name] = interpolated_val
 

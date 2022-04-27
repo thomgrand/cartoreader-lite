@@ -6,9 +6,11 @@ from os import PathLike
 import os
 import re
 
-visitag_misc_data_re_i = re.compile("^\s+(\w+)=\s+(-?\d+)")
-visitag_misc_data_re_f = re.compile("^\s+(\w+)=\s+(-?\d+\.\d+)")
-visitag_misc_data_re = re.compile("^\s+(\w+)=\s+(\w+)")
+from cartoreader_lite.low_level.utils import convert_df_dtypes
+
+visitag_misc_data_re_i = re.compile(r"^\s+(\w+)=\s+(-?\d+)")
+visitag_misc_data_re_f = re.compile(r"^\s+(\w+)=\s+(-?\d+\.\d+)")
+visitag_misc_data_re = re.compile(r"^\s+(\w+)=\s+(\w+)")
 
 def parse_misc_visitag_data(file_h : Union[IO, PathLike]):
     with open(file_h, "r") as f:
@@ -25,7 +27,7 @@ def parse_misc_visitag_data(file_h : Union[IO, PathLike]):
 
 def parse_visitag_file(file_h : Union[IO, PathLike], *args, **kwargs) -> Union[pd.DataFrame, Dict[str,str]]:
     try:
-        return pd.read_csv(file_h, *args, **kwargs)
+        return convert_df_dtypes(pd.read_csv(file_h, *args, **kwargs))
     except ParserError as err:
         return parse_misc_visitag_data(file_h)
 

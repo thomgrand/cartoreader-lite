@@ -1,4 +1,4 @@
-from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor, wait
+from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor, Future
 import xml.etree.ElementTree as ET 
 from xml.etree.ElementTree import Element
 import os
@@ -68,7 +68,14 @@ class CartoLLMap:
 
         #Import mesh
         if "FileNames" in xml_h.keys():
-            self.mesh, self.mesh_metadata = read_mesh_file(os.path.join(path_prefix, self.file_names))
+            fname = os.path.join(path_prefix, self.file_names)
+            if os.path.isfile(fname):
+                self.mesh, self.mesh_metadata = read_mesh_file(fname)
+            else:
+                print(f"Warning: File {fname} referenced for map {self.name}, but could not be found")
+                raise FileNotFoundError(fname)
+                #self.mesh = pv.UnstructuredGrid()
+                #self.mesh_metadata = {}
 
         if "Id" in self.points_main_data: 
             self.import_raw_points(path_prefix)
@@ -112,6 +119,9 @@ class CartoAuxMesh:
         if "Matrix" in self.metadata:
             self.affine = np.fromstring(self.metadata["Matrix"], sep=" ").reshape([4, 4])
 
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}(name={self.name}, path={self.mesh_path}, mesh={self.mesh_data})"
+
 class CartoLLStudy:
     """Low level CARTO study class that reads all information found in the CARTO3 study and saves it.
 
@@ -152,7 +162,6 @@ class CartoLLStudy:
 
             self.aux_meshes = [m.result() for m in self.aux_meshes]
 
-
     def _parse_maps(self, maps : Element, path_prefix : str):
         """Parses and loads the maps given in the study
 
@@ -173,8 +182,14 @@ class CartoLLStudy:
                 elif elem.tag == "ColoringTable":
                     self.coloring_table = xml_to_dataframe(elem)
 
-            self.maps = [res.result() for res in self.maps]
-
+            maps = []
+            for res in self.maps:
+                try:
+                    maps.append(res.result())
+                except Exception as ex:
+                    print(f"Importing a map failed. Original error: {type(ex)}, {ex}")
+                    
+            self.maps = maps
 
     def _read_xml(self, xml_h : ET, path_prefix : str):
         """Read the XML data of the study and parses all the data in it
@@ -251,4 +266,4 @@ class CartoLLStudy:
         elif os.path.isfile(arg1) and arg1.endswith(".zip"): #Possible second argument: study name
             self._from_zip(arg1, arg2)
         else:
-            assert False, "Given arguments not (yet) supported"
+            assert False, "Given arguments not (yet) supported, or the study file/folder was not found."
