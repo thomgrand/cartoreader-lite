@@ -92,6 +92,9 @@ class AblationSites():
             self.session_avg_data = xyz_to_pos_vec(self.session_avg_data)
             self.session_time_data = [(session_id, xyz_to_pos_vec(time_data)) for session_id, time_data in self.session_time_data]
 
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}({len(self.session_time_data)} sessions)"
+
 ecg_gain_re = re.compile(r"\s*Raw ECG to MV \(gain\)\s*\=\s*(-?\d+\.?\d*)\s*")
 ecg_labels = ["I", "II", "III", "aVR", "aVL", "aVF"] + [f"V{i+1}" for i in range(6)]
 ecg_labels_re = [re.compile(l + r"\(\d+\)") for l in ecg_labels]
@@ -258,6 +261,9 @@ class CartoMap():
         self._simplify(ll_map, *simplify_args, **simplify_kwargs)
         #del self.ll_map
 
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}(name={self.name}, nr_points={self.nr_points}, mesh={self.mesh})"
+
 class CartoStudy():
     """High level class to easily read Carto3 archives, directories or buffered studies.
 
@@ -378,3 +384,6 @@ class CartoStudy():
 
         assert issubclass(type(data), CartoStudy), "Unexpected unpickling result"
         return data
+
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}(name={self.name}, nr_maps={self.nr_maps}, maps={self.maps}, aux_meshes={self.aux_meshes})"
