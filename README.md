@@ -28,7 +28,7 @@ pip install -e .
 # Usage
 
 To test the library, you first need to get CARTO3 data. 
-None is provided with this repository, but you can download the testing data provided by [OpenEP](https://openep) to quickly try out the library (make sure the libary was installed first):
+None is provided with this repository, but you can download the testing data provided by [OpenEP](https://openep.io) to quickly try out the library (make sure the libary was installed first):
 
 ```bash
 python tests/generate_test_data.py
