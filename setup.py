@@ -18,7 +18,7 @@ setup(name="cartoreader-lite",
     classifiers=[
         "Programming Language :: Python :: 3"
     ],
-    python_requires='>=3.8',
+    python_requires='>=3.11',
      author="Thomas Grandits",
      author_email="tomdev@gmx.net",
      license="AGPL", 

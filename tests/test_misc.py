@@ -1,7 +1,6 @@
-import pkg_resources 
+from importlib.metadata import version
 import cartoreader_lite
-import re
 
 def test_version_consistency():
-    version = pkg_resources.require("cartoreader-lite")[0].version
-    assert version == cartoreader_lite.__version__
+    installed_version = version("cartoreader-lite")
+    assert installed_version == cartoreader_lite.__version__
