@@ -164,7 +164,7 @@ def simplify_dataframe_dtypes(df : pd.DataFrame, dtype_dict : dict, inplace=True
 def interp1d_dtype(x : np.ndarray, y : np.ndarray, *args, **kwargs):
 
     #For complex objects (e.g. strings), just take the closest object
-    if y.dtype == np.object0 or y.dtype == str:
+    if y.dtype == object or y.dtype == str:
         kdtree = cKDTree(x[:, np.newaxis])
         interp_f = lambda x_query: y[kdtree.query(x_query[:, np.newaxis])[1]]
     else:
