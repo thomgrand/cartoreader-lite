@@ -191,7 +191,7 @@ class CartoLLStudy:
                     
             self.maps = maps
 
-    def _read_xml(self, xml_h : ET, path_prefix : str):
+    def _read_xml(self, xml_h : "ET.ElementTree[ET.Element[str]]", path_prefix : str):
         """Read the XML data of the study and parses all the data in it
 
         Parameters
@@ -213,7 +213,7 @@ class CartoLLStudy:
 
             [res.result() for res in futures]
 
-    def _from_zip(self, zip_fname : str, study_name : str = None):
+    def _from_zip(self, zip_fname : str, study_name : str | None = None):
         """Loads the study from a zipped file by extracting it first and then calling :meth:`._from_dir`
 
         Parameters
