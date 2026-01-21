@@ -11,7 +11,7 @@ import re
 from os import PathLike
 import numpy as np
 from scipy.interpolate import interp1d
-from scipy.spatial import cKDTree
+from scipy.spatial import KDTree
 
 multi_whitespace_re = re.compile(r"\s\s+")
 
@@ -38,14 +38,14 @@ def read_connectors(xml_elem : Element, path_prefix : str) -> Dict[str, List[pd.
         full_fname = os.path.join(path_prefix, fname)
         with open(full_fname, "r") as f:
             metadata = (os.path.splitext(fname)[0], f.readline().strip())
-            connectors[k].append((metadata, pd.read_csv(f, sep="\s+"))) #skiprows=1))) #Not necessary to skiprows if we don't seek to the beginning
+            connectors[k].append((metadata, pd.read_csv(f, sep=r"\s+"))) #skiprows=1))) #Not necessary to skiprows if we don't seek to the beginning
 
     return dict(connectors)
 
 def read_contact_force(fname : str) -> pd.DataFrame:
     with open(fname, "r") as f:
         metadata = [f.readline().strip() for i in range(7)]
-        data = pd.read_csv(f, sep="\s+")
+        data = pd.read_csv(f, sep=r"\s+")
 
     return metadata, data
 
@@ -91,7 +91,7 @@ def read_point_data(map_name : str, point_id : int, path_prefix : str = None) ->
                 ecg_header = [elem for elem in re.split(multi_whitespace_re, ecg_header) if len(elem) > 0] #Two or more whitespaces as delimiters
                 #ecg_f.seek(0)
                 ecg_data = pd.read_csv(ecg_f, #skiprows=4, #Not necessary if we don't seek to the beginning
-                                        header=None, sep="\s+", names=ecg_header, dtype=np.int16)
+                                        header=None, sep=r"\s+", names=ecg_header, dtype=np.int16)
             data["ecg"] = (ecg_metadata, ecg_data) 
         elif elem.tag == "ContactForce":
             data["contact_force_data"] = read_contact_force(os.path.join(path_prefix, elem.attrib["FileName"]))
@@ -100,13 +100,19 @@ def read_point_data(map_name : str, point_id : int, path_prefix : str = None) ->
 
     return metadata, data
 
+def try_to_convert_to_numeric(series: pd.Series) -> pd.Series:
+    try:
+        return pd.to_numeric(series)
+    except (ValueError, TypeError):
+        return series
+
 def convert_df_dtypes(df : pd.DataFrame, inplace=True) -> pd.DataFrame:
     if not inplace:
         df = df.copy()
 
     #Convert to numerical values wherever possible
     for k in df:
-        df[k] = pd.to_numeric(df[k], errors="ignore")
+        df[k] = try_to_convert_to_numeric(df[k])
 
     return df
 
@@ -165,7 +171,7 @@ def interp1d_dtype(x : np.ndarray, y : np.ndarray, *args, **kwargs):
 
     #For complex objects (e.g. strings), just take the closest object
     if y.dtype == object or y.dtype == str:
-        kdtree = cKDTree(x[:, np.newaxis])
+        kdtree = KDTree(x[:, np.newaxis])
         interp_f = lambda x_query: y[kdtree.query(x_query[:, np.newaxis])[1]]
     else:
         interp_f = interp1d(x, y, *args, **kwargs)
@@ -185,7 +191,7 @@ def interpolate_time_data(dfs : Iterable[pd.DataFrame], time_k, time_steps, **in
 
             interp_fs[-1][col_name] = interp1d_dtype(df[time_k].to_numpy(), df.iloc[:, col_i].to_numpy(), **interp_kwargs)
             #if series.dtype == np.object0:
-            #    kdtree = cKDTree(df[time_k].to_numpy()[:, np.newaxis])
+            #    kdtree = KDTree(df[time_k].to_numpy()[:, np.newaxis])
             #    interp_fs[-1][col_name] = lambda x: df.iloc[kdtree.query(x[:, np.newaxis])[1], col_i]
             #else:
             #    interp_fs[-1][col_name] = interp1d(df[time_k], df.iloc[:, col_i], **interp_kwargs)

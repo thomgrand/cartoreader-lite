@@ -30,8 +30,8 @@ def test_convert_df_dtypes():
     df_conv = convert_df_dtypes(df, inplace=False)
     assert np.issubdtype(df_conv.a.dtype, np.integer)
     assert np.issubdtype(df_conv.b.dtype, np.floating)
-    assert np.issubdtype(df.a.dtype, object)
-    assert np.issubdtype(df.b.dtype, object)
+    assert pd.api.types.is_string_dtype(df.a.dtype)
+    assert pd.api.types.is_string_dtype(df.b.dtype)
 
     convert_df_dtypes(df, inplace=True)
     assert np.issubdtype(df.a.dtype, np.integer)

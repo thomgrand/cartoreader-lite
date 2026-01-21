@@ -35,7 +35,7 @@ def read_section(lines : Iterable[str]) -> pd.DataFrame:
     """
     vertices_str = "\n".join(lines)
     verts_io = StringIO(vertices_str)
-    df = pd.read_csv(verts_io, comment=";", header=None, sep="\s+")
+    df = pd.read_csv(verts_io, comment=";", header=None, sep=r"\s+")
     valid_line_i = [i for i, l in enumerate(lines) if not l.strip().startswith(";")][0] #Find first non-comment line
     assert valid_line_i > 0, "No header row found"
     names = [name for name in re.split(r"\s+", lines[valid_line_i-1]) if name not in ["", ";"]]

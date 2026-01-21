@@ -35,7 +35,7 @@ def parse_visitag_files(file_hs : Iterable[Union[IO, PathLike]]) -> List[pd.Data
     data = []
     with ThreadPoolExecutor() as pool:
         for file_h in file_hs:
-            data.append(pool.submit(parse_visitag_file, file_h, sep="\s+"))
+            data.append(pool.submit(parse_visitag_file, file_h, sep=r"\s+"))
 
     return [d.result() for d in data]
 
