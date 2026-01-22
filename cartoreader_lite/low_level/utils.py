@@ -145,7 +145,7 @@ def snake_to_camel_case(name : str, capitalize=False) -> str:
     return ret
 
 def convert_fname_to_handle(file : Union[IO, PathLike], mode : str):
-    is_fname = issubclass(type(file), str)
+    is_fname = isinstance(file, (str, PathLike))
     if is_fname:
         #assert file.endswith("pkl.gz"), "Only allowed file type is currently pkl.gz"
         file = open(file, mode)
